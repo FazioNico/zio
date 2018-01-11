@@ -1,0 +1,11 @@
+{
+  "name": "test",
+  "private": true,
+  "dependencies": {
+    "rxjs": "5.5.2"
+  },
+  "engines": {
+    "node": "~7.0.0"
+  },
+  "version": "0.0.1"
+}

@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "experimentalDecorators": true,
+    "target": "es5",
+    "lib": [
+      "es2015"
+    ],
+    "module": "commonjs",
+    "sourceMap": false,
+    "strict": true,
+    "outDir": "./bin"
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "bin",
+    "starter"
+  ],
+  "compileOnSave": false,
+  "atom": {
+    "rewriteTsconfig": false
+  }
+}
