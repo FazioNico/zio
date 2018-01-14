@@ -7,7 +7,7 @@
   "description": "Zio CLI to generate starter projects",
   "scripts": {
     "postinstall": "node tools/install.js",
-    "dev":"tsc -w",
+    "dev": "tsc -w",
     "build-source": "node bin/build.js",
     "release:maj": "bash tools/tasks/release.project.sh major",
     "release:min": "bash tools/tasks/release.project.sh minor",
@@ -23,7 +23,9 @@
     "figlet": "^1.2.0",
     "inquirer": "^5.0.0",
     "shelljs": "^0.7.7",
-    "simple-git": "^1.85.0"
+    "simple-git": "^1.85.0",
+    "to-pascal-case": "^1.0.0",
+    "to-slug-case": "^1.0.0"
   },
   "devDependencies": {
     "@types/node": "^9.3.0",

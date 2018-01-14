@@ -5,28 +5,16 @@
  * @Date:   09-01-2018
  * @Email:  contact@nicolasfazio.ch
  * @Last modified by:   webmaster-fazio
- * @Last modified time: 10-01-2018
+ * @Last modified time: 14-01-2018
  */
 
-import { cd, exec } from "shelljs";
 import * as program from "commander";
-import { spawn } from "child_process";
 import * as chalk from "chalk";
-import * as inquirer from "inquirer";
-const git = require('simple-git/promise');
-import * as CliSpinner from "cli-spinner";
-
-const spinner = new CliSpinner.Spinner('processing.. %s');
-spinner.setSpinnerString('|/-\\');
 
 const pkg = require('../package.json');
-import { runcmd } from "./utils";
-import { start } from "./commandes/start";
-
-function cmdError(cmd:string){
-  console.log(chalk.red(`[ERROR] Unable to find command: `) + chalk.green(cmd));
-  return program.outputHelp(chalk.cyan)
-}
+import * as utils from "./utils";
+import { Init } from "./commandes/init";
+import { CmdSwitcher } from "./commandes";
 
 var cmd:string,
     framework:string,
@@ -38,8 +26,15 @@ program
   .usage('<Commands>');
 
 program
+  .command('init',)
+  .description('Initialize Zio Cli for your project.')
+  .action(_=>{
+    cmd = 'init';
+  });
+
+program
   .command('start',)
-  .description('Create a new project')
+  .description('Create a new project.')
   // TODO: enable options
   // .option('-f, --framework [framework]', 'select framework')
   // .option('-t, --template [template]', 'select template')
@@ -50,6 +45,13 @@ program
     // template = options.template|| null;
   });
 
+program
+  .command('add',)
+  .description('Add new element to your app.')
+  .action(_=>{
+    cmd = 'add';
+  });
+
 program.parse(process.argv);
 
 if(!cmd){
@@ -58,31 +60,20 @@ if(!cmd){
   process.exit(1);
 }
 
-switch (true) {
-
-  case cmd === 'start':
-    start(framework,template)
-      .then(res=> {
-        if(res.success === true){
-          console.log(chalk.green.bold(`[Success] Project is successfully started !!!`))
-          console.log(chalk.green(`Let's get started by runing: $ cd ${res.appname}`))
-          process.exit();
-          return;
-        }
-        console.log(chalk.red.bold(res.error));
-        process.exit();
-      })
-      .catch(err=> {
-        spinner.stop();
-        console.log(chalk.red.bold('[ERROR] cli.ts'))
-        console.log(chalk.red(err))
-        process.exit(1)}
-      );
-    break;
-  case cmd === 'g':
-    spinner.stop();
-    console.log('g')
-    process.exit();
-    break;
-  default: spinner.stop();
+// check zio.config.json file config.
+if(cmd === 'init' && utils.fileExists('./zio.config.json')){
+  // create file config.
+  utils.displayError('Cannot init project cause zio.config.json already existe.')
+  program.outputHelp(chalk.white)
+  process.exit(1);
+}
+else if(cmd === 'init' && !utils.fileExists('./zio.config.json')){
+  // create file config.
+  new Init();
+}
+else if(cmd !== 'init' && !utils.fileExists('./zio.config.json')){
+  new Init(true)
+}
+else {
+  new CmdSwitcher(cmd);
 }

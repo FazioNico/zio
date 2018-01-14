@@ -4,14 +4,50 @@
 * @Author: Nicolas Fazio <webmaster-fazio>
 * @Date:   09-01-2018
 * @Email:  contact@nicolasfazio.ch
-* @Last modified by:   webmaster-fazio
-* @Last modified time: 10-01-2018
+ * @Last modified by:   webmaster-fazio
+ * @Last modified time: 14-01-2018
 */
 
-import { spawn } from "child_process";
+import { spawn, execSync } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 import * as Inquirer from "inquirer";
+import * as chalk from "chalk";
+import * as toSlugCase from "to-slug-case"
+import * as toPascalCase from "to-pascal-case"
+import * as CliSpinner from "cli-spinner";
+
+function shouldUseYarn() {
+  try {
+    execSync('yarnpkg --version', { stdio: 'ignore' });
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+const installPackages = (appname:string):Promise<{success:boolean, appname?:string}> => {
+  console.log(chalk.white.bold('Installing Packages for '+ appname));
+  return new Promise((resolve, reject) => {
+    let command:string;
+    let args:string[] = ['install'];
+    if (shouldUseYarn()) {
+      command = 'yarn';
+    } else {
+      command = 'npm';
+    }
+    const child = spawn(command, args, { stdio: 'inherit' });
+    child.on('close', code => {
+      if (code !== 0) {
+        reject({
+          command: `${command} ${args.join(' ')}`
+        });
+        return;
+      }
+      resolve( {success:true, appname});
+    })
+  })
+}
 
 export function getCurrentDirectoryBase():string {
   return path.basename(process.cwd());
@@ -24,6 +60,18 @@ export function directoryExists(filePath) {
   }
 }
 
+export function fileExists(filePath) {
+  try {
+    if(fs.statSync(filePath)){
+      return true
+    }
+    else {
+      return false
+    }
+  } catch (err) {
+    return false;
+  }
+}
 export function runcmd(command: string, args?: string[]): Promise<string> {
   return new Promise<string>((resolve, reject) => {
     const p = spawn(command, args, { shell: true, stdio: 'inherit' });
@@ -72,4 +120,23 @@ export function runcmd(command: string, args?: string[]): Promise<string> {
       }
     });
   });
+}
+
+export function displayError(message:string){
+  console.log(chalk.red('[ERROR] ', message));
+  // program.outputHelp(chalk.white)
+  process.exit(1);
+}
+
+export const spinner = (()=> {
+  const s = new CliSpinner.Spinner('processing.. %s');
+  return s.setSpinnerString('|/-\\');
+})();
+
+export const slugCase = (txt:string):string=>{
+  return toSlugCase(txt)
+}
+
+export const pascalCase = (txt:string):string=>{
+  return toPascalCase(txt)
 }
