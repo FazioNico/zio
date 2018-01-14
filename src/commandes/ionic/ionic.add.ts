@@ -94,6 +94,7 @@ export class IonicAdd {
         cp('-r', folder, `src/store`);
         // TODO: install all npm package dependecies
         // and remove package.json installer
+        // TODO: add to app.module.ts import module + declartion
       });
       utils.spinner.stop(true);
       (isInstall)
