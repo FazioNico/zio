@@ -6,16 +6,18 @@
  * @Last modified time: 14-01-2018
  */
 
-import { cp, sed } from "shelljs";
+import { cp, sed, test } from "shelljs";
 import * as inquirer from "inquirer";
 import * as figlet from "figlet";
 import * as chalk from "chalk";
 
 import { frameworksQuestion, ZIO_DIR } from "../config";
-import { displayError } from "../utils";
+import * as utils from "../utils";
 
 export class Init {
-    constructor(autocall = false){
+    public framework:string|null;
+    constructor(autocall:boolean = false, appname:string = '', framework:string|null = null){
+      this.framework = framework;
       console.log('----------------------------------------------------------');
       if(autocall) {
         console.log(
@@ -30,13 +32,14 @@ export class Init {
       }
       console.log('----------------------------------------------------------');
 
+
       this.askQuestions()
-        .then(config=>this.createFileConfig(config))
+        .then(config=>this.createFileConfig(config, appname))
         .then(_=>{
           figlet('Zio Cli', (err,data)=> {
             if (err) {
               console.log('figlet err--->',err);
-              displayError(err.toSring())
+              utils.displayError(err.toSring())
             }
             console.log('----------------------------------------------------------');
             console.log(data);
@@ -45,8 +48,6 @@ export class Init {
             console.log(chalk.white('Now you can use it to speed up application developpement!'));
             console.log(
               chalk.white('Next step: run ')+
-              chalk.white.bold('$ zio start')+
-              chalk.white(' or ')+
               chalk.white.bold('$ zio add')+
               chalk.white(' into your console to create elements.')
             );
@@ -57,13 +58,27 @@ export class Init {
         })
     }
     askQuestions(){
-      return inquirer
-      .prompt([frameworksQuestion])
-      .then(res=>res.framework)
+      if(!this.framework){
+        return inquirer
+        .prompt([frameworksQuestion])
+        .then(res=>res.framework)
+      }
+      return Promise.resolve(this.framework)
+
     }
 
-    createFileConfig(config:string){
-      cp('-n', ZIO_DIR.STARTER+'/zio.config.json', 'zio.config.json')
-      sed('-i', 'starter', config, 'zio.config.json');
+    createFileConfig(config:string, appname:string = ''){
+      if(test('-d', './src')){
+        cp('-n', ZIO_DIR.STARTER+'/zio.config.json', 'zio.config.json')
+        sed('-i', 'starter', config, 'zio.config.json');
+      }
+      else if(test('-d', './'+appname+'/src')){
+        cp('-n', ZIO_DIR.STARTER+'/zio.config.json', appname+'/zio.config.json')
+        sed('-i', 'starter', config, appname+'/zio.config.json');
+      }
+      else {
+        utils.displayError('Unable to create file config: ' + appname+'/zio.config.json')
+      }
+
     }
 }

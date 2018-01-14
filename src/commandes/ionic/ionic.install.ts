@@ -14,7 +14,7 @@ import * as utils from "../../utils";
 
 export const install = {
   init: (config:{appname:string, framework:string, template:string})=>{
-    if(config.framework !== 'ionic') return {success:false, error:`[ERROR] Not a valide framework: <${config.framework}> is not supported`};
+    if(config.framework !== 'ionic') return Promise.reject({success:false, error:`[ERROR] Not a valide framework: <${config.framework}> is not supported`});
     if(
       config.template === 'tabs'||
       config.template ==='blank'||
@@ -28,7 +28,7 @@ export const install = {
       return install.perso(config)
     }
     else {
-      return {success:false, error: `[ERROR] This template not exist: <${config.template}>`}
+      return Promise.reject({success:false, error: `[ERROR] This template not exist: <${config.template}>`})
     }
   },
   official: async (config)=> {

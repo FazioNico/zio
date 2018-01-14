@@ -71,7 +71,7 @@ else if(cmd === 'init' && !utils.fileExists('./zio.config.json')){
   // create file config.
   new Init();
 }
-else if(cmd !== 'init' && !utils.fileExists('./zio.config.json')){
+else if(cmd !== 'init' && cmd !== 'start' && !utils.fileExists('./zio.config.json')){
   new Init(true)
 }
 else {
