@@ -16,6 +16,7 @@ import * as chalk from "chalk";
 import * as toSlugCase from "to-slug-case"
 import * as toPascalCase from "to-pascal-case"
 import * as CliSpinner from "cli-spinner";
+import * as npmInstall from 'spawn-npm-install';
 
 function shouldUseYarn() {
   try {
@@ -26,7 +27,7 @@ function shouldUseYarn() {
   }
 }
 
-const installPackages = (appname:string):Promise<{success:boolean, appname?:string}> => {
+export const installPackages = (appname:string):Promise<{success:boolean, appname?:string}> => {
   console.log(chalk.white.bold('Installing Packages for '+ appname));
   return new Promise((resolve, reject) => {
     let command:string;
@@ -46,6 +47,19 @@ const installPackages = (appname:string):Promise<{success:boolean, appname?:stri
       }
       resolve( {success:true, appname});
     })
+  })
+}
+
+export const addPackages = (packages:{dep:string[],devdep:string[]}):Promise<{success:boolean, appname?:string}> => {
+  return new Promise((resolve, reject) => {
+    npmInstall(packages.dep,  { save: true },err=> {
+      if(err) reject({success:false});
+      npmInstall(packages.devdep, { saveDev: true }, err=> {
+        if(err) reject({success:false});
+        resolve({success:true})
+      })
+    })
+
   })
 }
 

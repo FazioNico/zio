@@ -8,7 +8,7 @@
  * @Last modified time: 14-01-2018
  */
 
-import { cp, sed, mv, find, rm, test, mkdir, cat, to } from "shelljs";
+import { cp, sed, mv, find, rm, test, mkdir, cat, to, echo } from "shelljs";
 import * as chalk from "chalk";
 import { execSync } from "child_process";
 import * as inquirer from "inquirer";
@@ -58,26 +58,54 @@ export class IonicAdd {
       this.copyBaseFoders()
       this.applyOption()
       this.renameFiles()
-      utils.spinner.stop(true)
+      utils.spinner.stop(true);
       // install core modules
-      if(doCoreModule) this.installCoreModule();
-      this.displaySuccess()
+      (doCoreModule)
+      ? this.installCoreModule()
+            .then(_=>this.displaySuccess())
+            .catch(err=> utils.displayError(err.toString()))
+      : this.displaySuccess();
     }
 
-    installCoreModule(){
+    async installCoreModule(){
       utils.spinner.start();
-      this.options.forEach(o => {
+      this.options.forEach(async o => {
         let oFolder = (o ==='ngrx')?'store':o;
         let folder = `${ZIO_DIR.STARTER_IONIC}/base/src/${oFolder}`;
         console.log(chalk.yellow(`[WARNING]`) + chalk.white(` Core module ${chalk.bold(o)} not existe. `))
         console.log(chalk.white(`[INFO]`) + chalk.white(` Installing core module ${chalk.bold(o)} .... `))
         cp('-r', folder, `src/${oFolder}`);
         // TODO: install all npm package dependecies
-        // and remove package.json installer
-        // TODO: add to app.module.ts import module + declartion
-        this.importCoreToAppModule(oFolder)
+        await this.installCorePackages(oFolder)
+              .then((res:any)=> {
+                if(!res.success)return;
+                utils.spinner.stop(true);
+                this.importCoreToAppModule(oFolder)
+              })
+
+
       });
-      utils.spinner.stop(true);
+
+      // TODO: add to app.module.ts import module + declartion
+
+    }
+
+    installCorePackages(option){
+      console.log(chalk.white('[INFO] Add Packages... '));
+      return utils.addPackages({
+        dep: (option === 'store')
+          ? ['@ngrx/effects', '@ngrx/store', '@ngrx/store-devtools','ngrx-store-freeze']
+          : ['@ngx-translate/core', '@ngx-translate/http-loader'],
+        devdep:(option === 'store')
+          ? ['ngrx-store-freeze', '@ngrx/store-devtools']
+          : []
+      })
+      .then(res=> {
+        console.log(chalk.white(''));
+        console.log(chalk.green('[SUCCESS]') + chalk.white(' Packages added. '));
+        return res
+      })
+      .catch(err=> utils.displayError(err.toString()))
     }
 
     importCoreToAppModule(f:string){

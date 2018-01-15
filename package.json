@@ -24,6 +24,7 @@
     "inquirer": "^5.0.0",
     "shelljs": "^0.7.7",
     "simple-git": "^1.85.0",
+    "spawn-npm-install": "^1.2.0",
     "to-pascal-case": "^1.0.0",
     "to-slug-case": "^1.0.0"
   },
