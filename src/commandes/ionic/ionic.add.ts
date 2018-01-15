@@ -5,7 +5,7 @@
  * @Date:   11-01-2018
  * @Email:  contact@nicolasfazio.ch
  * @Last modified by:   webmaster-fazio
- * @Last modified time: 14-01-2018
+ * @Last modified time: 16-01-2018
  */
 
 import { cp, sed, mv, find, rm, test, mkdir, cat, to, echo } from "shelljs";
@@ -75,13 +75,19 @@ export class IonicAdd {
         console.log(chalk.yellow(`[WARNING]`) + chalk.white(` Core module ${chalk.bold(o)} not existe. `))
         console.log(chalk.white(`[INFO]`) + chalk.white(` Installing core module ${chalk.bold(o)} .... `))
         cp('-r', folder, `src/${oFolder}`);
-        // TODO: install all npm package dependecies
-        await this.installCorePackages(oFolder)
+        // install all npm package dependecies
+        await this.installCorePackages(o)
+              .then(res=> {
+                console.log(chalk.white(''));
+                console.log(chalk.green('[SUCCESS] ') + chalk.white.bold(o) + chalk.white( ` packages added. `));
+                return res
+              })
               .then((res:any)=> {
                 if(!res.success)return;
                 utils.spinner.stop(true);
                 this.importCoreToAppModule(oFolder)
               })
+              .catch(err=> utils.displayError(err.toString()))
 
 
       });
@@ -90,22 +96,20 @@ export class IonicAdd {
 
     }
 
-    installCorePackages(option){
-      console.log(chalk.white('[INFO] Add Packages... '));
-      return utils.addPackages({
-        dep: (option === 'store')
-          ? ['@ngrx/effects', '@ngrx/store', '@ngrx/store-devtools','ngrx-store-freeze']
-          : ['@ngx-translate/core', '@ngx-translate/http-loader'],
-        devdep:(option === 'store')
-          ? ['ngrx-store-freeze', '@ngrx/store-devtools']
-          : []
-      })
-      .then(res=> {
-        console.log(chalk.white(''));
-        console.log(chalk.green('[SUCCESS]') + chalk.white(' Packages added. '));
-        return res
-      })
-      .catch(err=> utils.displayError(err.toString()))
+    installCorePackages(option:string){
+      console.log(chalk.white('[INFO] Add Packages for '+ chalk.white.bold(option) +' ... '));
+      switch(true){
+        case option === 'ngrx':
+          return utils.addPackages({
+            dep:['@ngrx/effects', '@ngrx/store', '@ngrx/store-devtools','ngrx-store-freeze'],
+            devdep: ['ngrx-store-freeze', '@ngrx/store-devtools']
+          });
+        case option === 'i18n':
+          return utils.addPackages({
+            dep:['@ngx-translate/core', '@ngx-translate/http-loader'],
+            devdep: ['']
+          });
+      }
     }
 
     importCoreToAppModule(f:string){
