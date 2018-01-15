@@ -8,7 +8,7 @@
  * @Last modified time: 14-01-2018
  */
 
-import { cp, sed, mv, find, rm, test, mkdir } from "shelljs";
+import { cp, sed, mv, find, rm, test, mkdir, cat, to } from "shelljs";
 import * as chalk from "chalk";
 import { execSync } from "child_process";
 import * as inquirer from "inquirer";
@@ -40,66 +40,90 @@ export class IonicAdd {
         utils.displayError(`"${this.nameSc}" folder already existe.`);
         return
       }
-      // if have options, check if have existing
-      // core module for each options
-      let doCoreModule = false;
+
+      let doInstallCoreModule = false;
       if(this.options.length>0){
-        this.options.forEach(o => {
-            // check if have core module for each option
-            let folder = `./src/${(o ==='ngrx')?'store':o}`;
+        this.options.forEach( o=> {
+          let folder = `./src/${(o ==='ngrx')?'store':o}`;
             if(!utils.directoryExists(folder)){
-              // toggle to true
-              doCoreModule = true;
-              console.log(chalk.yellow('[WARNING]') + chalk.white(` You need corresponding core module to use option ${o}.`));
-              inquirer.prompt([{
-                type: 'confirm',
-                name: 'installCore',
-                message: `Want to install ${o} core module ??(just hit enter for YES)?`,
-                default: true
-              }])
-              .then(res=> {
-                if(!res.installCore){
-                  console.log('[EXIT] End of process.')
-                  doCoreModule = false;
-                  return;
-                }
-                // toggle to true
-                this.installCoreModule(true)
-              })
-              return
+              doInstallCoreModule = true;
             }
-        });
+        })
       }
-      if(doCoreModule){
-        return;
-      }
-      this.install()
+      this.install(doInstallCoreModule)
     }
 
-    install(){
-      console.log(chalk.white('[INFO]') + ' install ...')
+    install(doCoreModule:boolean){
       utils.spinner.start();
       this.copyBaseFoders()
       this.applyOption()
       this.renameFiles()
       utils.spinner.stop(true)
+      // install core modules
+      if(doCoreModule) this.installCoreModule();
       this.displaySuccess()
     }
 
-    installCoreModule(isInstall:boolean=false){
+    installCoreModule(){
       utils.spinner.start();
       this.options.forEach(o => {
         let oFolder = (o ==='ngrx')?'store':o;
         let folder = `${ZIO_DIR.STARTER_IONIC}/base/src/${oFolder}`;
-        cp('-r', folder, `src/store`);
+        console.log(chalk.yellow(`[WARNING]`) + chalk.white(` Core module ${chalk.bold(o)} not existe. `))
+        console.log(chalk.white(`[INFO]`) + chalk.white(` Installing core module ${chalk.bold(o)} .... `))
+        cp('-r', folder, `src/${oFolder}`);
         // TODO: install all npm package dependecies
         // and remove package.json installer
         // TODO: add to app.module.ts import module + declartion
+        this.importCoreToAppModule(oFolder)
       });
       utils.spinner.stop(true);
-      (isInstall)
-        ? this.install()
-        : null;
+    }
+
+    importCoreToAppModule(f:string){
+      let datas = {
+        store: {
+          imp: `
+  // Import ngrx Tools
+  import { NgRxStoreModule } from "../store/store.module";
+          `,
+          ngImp: `
+  @NgModule({
+    ...
+    imports: [
+      ...
+      NgRxStoreModule.forRoot(), // import AppCore NgRxStoreModule before IonicModule.forRoot()
+      IonicModule.forRoot(MyApp)
+    ],
+    ...
+          `,
+        },
+        i18n: {
+          imp: `
+  // Import i18n translate module
+  import { I18nModule} from "../i18n/i18n.module";
+          `,
+          ngImp: `
+  @NgModule({
+    ...
+    imports: [
+      ...
+      I18nModule.forRoot(), // import i18n module before IonicModule.forRoot()
+      IonicModule.forRoot(MyApp)
+    ],
+    ...
+          `
+        }
+      };
+
+      console.log(chalk.green(`[SUCCESS]`) + chalk.white(` Create core ${chalk.bold(f)} module`))
+      console.log(chalk.white('[IMPORTANT]') + chalk.white(` Do not forget to add the following content to your ${chalk.bold('./src/app/app.module.ts')}`));
+      console.log('')
+      console.log(chalk.cyan(datas[f].imp))
+      console.log(chalk.cyan(datas[f].ngImp))
+      console.log('----------------------------------------------------------');
+      //execSync(`find . -name 'app.module*' -exec sed '-i' '' 's/@NgModule({/${imp}/g' {} \\;`);
+
     }
 
     copyBaseFoders(){
