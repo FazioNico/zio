@@ -87,6 +87,7 @@ export class CmdSwitcher {
                     })
           : null;
       })
+      .then(_=> this.checkFrameworkPackageGlobaly())
       .then(async _=> {
         // check if framework is define
         if(!this.framework) return Promise.reject('No framework selected...');
@@ -150,5 +151,10 @@ export class CmdSwitcher {
         // display error deh
         utils.displayError(error)
       })
+    }
+
+    async checkFrameworkPackageGlobaly(){
+      // TODO: check if framework package existe globaly...
+      return await  console.log('check if framework package existe globaly...')
     }
 }
