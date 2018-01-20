@@ -8,12 +8,6 @@
 
 import { Component, OnInit } from '@angular/core';
 import { IonicPage, NavController } from 'ionic-angular';
-//# BOF_i18n
-import { StarterI18nModule } from "./i18n/starter-i18n.module";
-//# EOF_i18n
-//# BOF_ngrx
-YYYYYYY
-//# EOF_ngrx
 
 /**
 * Generated class for the Starter page.
@@ -35,4 +29,7 @@ export class Starter implements OnInit{
     public navCtrl: NavController
   ) {}
 
+  ngOnInit(){
+    
+  }
 }

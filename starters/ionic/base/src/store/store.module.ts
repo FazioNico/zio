@@ -14,12 +14,8 @@ import { ErrorEffects } from '../store/effects/errorEffects';
 // Import Providers Service
 import { AlertService } from "../providers/alert-service/alert-service";
 
-// (Optional): import auth-store.service to enable Login on rootPage
-import { AuthStoreService } from '../pages/login/store/auth-store.service';
-
 const providers:Array<any> =  [
-    AlertService,
-    AuthStoreService
+    AlertService
 ];
 const effects:Array<any> = [
     ErrorEffects

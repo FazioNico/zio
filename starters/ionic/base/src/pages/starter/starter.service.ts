@@ -2,13 +2,14 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import {Observable} from 'rxjs/Observable';
+import { Observable } from 'rxjs/Observable';
 
 import { HttpService } from "../../providers/http-service/http.service";
 import { EnvVariables } from '../../app/environment/environment.token';
 import { IEnvironment } from "../../app/environment/env-model";
+//# BOF_ngrx
 import { IStarterState } from "./store/starter.reducer";
-
+//# EOF_ngrx
 /*
 Generated class for the AuthService provider.
 

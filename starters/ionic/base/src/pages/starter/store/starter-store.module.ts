@@ -8,7 +8,7 @@
  import * as fromStarter from './starter.reducer';
  import { StarterStoreService } from "./starter-store.service";
 
- // import TaskStoreModule in the TaskModule
+ // import StoreModule in the StarterStoreModule
  @NgModule({
    imports: [
      StoreModule.forFeature('starter', fromStarter.reducer),

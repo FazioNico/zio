@@ -2,7 +2,7 @@
 import { NgRxAction } from '../ngrx.actions';
 
 export const ErrorActions = {
-  ERROR_SHARED: '[Err] Error',
+  ERROR_SHARED: '[Err] Error from shared store module',
   ERROR_DISPLAY: '[Err] Display Requested',
   ERROR_DISPLAY_SUCCESS: '[Err] Display Success',
   ERROR_DISPLAY_FAILED: '[Err] Display not working',
