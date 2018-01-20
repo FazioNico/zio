@@ -8,7 +8,7 @@
   "scripts": {
     "postinstall": "node tools/install.js",
     "dev": "tsc -w",
-    "build-source": "node bin/build.js",
+    "build-source": "node bin/cli.js",
     "release:maj": "bash tools/tasks/release.project.sh major",
     "release:min": "bash tools/tasks/release.project.sh minor",
     "release:patch": "bash tools/tasks/release.project.sh patch"
