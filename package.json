@@ -1,0 +1,36 @@
+{
+  "version": "0.1.0",
+  "main": "index.js",
+  "bin": "bin/cli.js",
+  "name": "zio",
+  "author": "Nicolas Fazio",
+  "description": "Zio CLI to generate starter projects",
+  "scripts": {
+    "postinstall": "node tools/install.js",
+    "dev": "tsc -w",
+    "build-source": "node bin/cli.js",
+    "release:maj": "bash tools/tasks/release.project.sh major",
+    "release:min": "bash tools/tasks/release.project.sh minor",
+    "release:patch": "bash tools/tasks/release.project.sh patch"
+  },
+  "repository": "",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^1.1.3",
+    "cli-spinner": "^0.2.7",
+    "commander": "^2.9.0",
+    "cross-spawn": "^5.1.0",
+    "figlet": "^1.2.0",
+    "inquirer": "^5.0.0",
+    "shelljs": "^0.7.7",
+    "simple-git": "^1.85.0",
+    "spawn-npm-install": "^1.2.0",
+    "to-pascal-case": "^1.0.0",
+    "to-slug-case": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^9.3.0",
+    "ts-node": "^4.1.0",
+    "typescript": "^2.6.2"
+  }
+}
