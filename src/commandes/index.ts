@@ -124,11 +124,19 @@ export class CmdSwitcher {
       .then(res => {
         // set generate element
         this.generate = res.generators
+        switch(true){
+          case this.generate.includes('environment'):
+          return Promise.resolve({options:[]})
+        }
         return inquirer.prompt([optionsQuestion])
       })
       .then(res => {
         // set options
         this.option = res.options
+        switch(true){
+          case this.generate.includes('environment'):
+          return Promise.resolve({name:'environment'})
+        }
         return inquirer.prompt([nameQuestion])
       })
       .then(res=>{

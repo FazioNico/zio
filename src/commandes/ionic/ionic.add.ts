@@ -33,6 +33,11 @@ export class IonicAdd {
       let generate = (this.generate.includes(' '))
                         ? this.generate.split(' ')[0]
                         : this.generate;
+      switch(true){
+        case generate === 'environment':
+          generate = 'app'
+          break;
+      }
       let folder =  `./src/${generate}/${this.nameSc}`
 
       // check if directoryExists
@@ -164,6 +169,12 @@ export class IonicAdd {
                         ? this.generate.split(' ')[0]
                         : this.generate;
       let folder =  `${ZIO_DIR.STARTER_IONIC}/base/src/${generate}/starter`
+      switch(true){
+        case generate === 'environment':
+          folder = `${ZIO_DIR.STARTER_IONIC}/base/src/app/${generate}`
+          generate = 'app/'
+          break;
+      }
       // check if ${generate} folder existe before copy content.
       if (!test('-d', `src/${generate}`)){
         mkdir('-p', `src/${generate}`)
@@ -173,10 +184,53 @@ export class IonicAdd {
         return
       }
       cp('-r', folder, `src/${generate}/${this.nameSc}`);
+      if(this.nameSc === 'environment'){
+        // cp declarations.d.ts
+        cp('-r', `${ZIO_DIR.STARTER_IONIC}/base/src/declarations.d.ts`, `src/declarations.d.ts`);
+        // cp tools/config/ionic.webpack.js
+        if (!test('-d', `tools`)){
+          mkdir('-p', `tools`)
+        }
+        if (!test('-d', `tools/config`)){
+          mkdir('-p', `tools/config`)
+        }
+        cp('-r', `${ZIO_DIR.STARTER_IONIC}/base/tools/config/ionic.webpack.js`, `tools/config/ionic.webpack.js`);
+        console.log(chalk.white('[IMPORTANT]') + chalk.white(` Do not forget to add the following content to your ${chalk.bold('./package.json')}`));
+        console.log(
+          chalk.cyan(`
+  ...
+  "config": {
+    "ionic_webpack": "./tools/config/ionic.webpack.js"
+  },
+  ...
+          `)
+        );
+        console.log(chalk.white('[IMPORTANT]') + chalk.white(` Do not forget to add the following content to your ${chalk.bold('./src/app.module.ts')}`));
+        console.log(
+          chalk.cyan(`
+  ...
+    // Import Environment Variables Module
+    import { EnvironmentsModule } from "./environment/environment.module";
+  ...
+
+  @NgModule({
+    ...
+    imports: [
+      ...
+      EnvironmentsModule.forRoot(), // import app environment variable in first.
+      IonicModule.forRoot(MyApp)
+    ],
+    ...
+          `)
+        )
+      }
       console.log('----------------------------------------------------------');
     }
 
     applyOption(){
+      if(this.options.length<1){
+        return ;
+      }
       let generate = (this.generate.includes(' '))
                         ? this.generate.split(' ')[0]
                         : this.generate;
@@ -193,30 +247,36 @@ export class IonicAdd {
         rm('-rf', `src/${generate}/${this.nameSc}/store`);
       }
       // remove all CLI tags like BOF_ and EOF_
-      find('./src/**/starter*')
-        .map(f=>{
-          if(f.includes('starter.') === -1) return f;
-          // delete line with tags..
-          sed('-i', /^.*BOF_.*$/, '', f);
-          sed('-i', /^.*EOF_.*$/, '', f);
-          return f
-        })
+      find('./src/**/starter*').map(f=>{
+        if(f.includes('starter.') === -1) return f;
+        // delete line with tags..
+        sed('-i', /^.*BOF_.*$/, '', f);
+        sed('-i', /^.*EOF_.*$/, '', f);
+        return f
+      })
     }
 
     renameFiles(){
-      // rename files name in content text files
-      execSync(`find . -name 'starter*' -exec sed -i '' s/starter/${this.nameSc}/g {} \\;`); // OK
-      execSync(`find . -name 'starter*' -exec sed -i '' s/Starter/${this.namePc}/g {} \\;`); // OK
-      //execSync(`find . -name 'starter*' -exec sed -i '' s/Starter/${this.name.charAt(0).toUpperCase()+this.name.slice(1)}/g {} \\;`); // OK
 
-      find('./src/**/starter*')
-        .map(f=>{
-          if(f.includes('starter.') === -1) return f;
-          // rename files name with ${this.name} in place of 'starter'
-          let dest = f.replace("starter", this.nameSc)
-          mv('-n', f, dest)
-          return f
-        })
+      try {
+        // rename files name in content text files
+        execSync(`find . -name 'starter*' -exec sed -i '' s/starter/${this.nameSc}/g {} \\;`); // OK
+        execSync(`find . -name 'starter*' -exec sed -i '' s/Starter/${this.namePc}/g {} \\;`); // OK
+        //execSync(`find . -name 'starter*' -exec sed -i '' s/Starter/${this.name.charAt(0).toUpperCase()+this.name.slice(1)}/g {} \\;`); // OK
+        find('./src/**/starter*')
+          .map(f=>{
+            if(f.includes('starter.') === -1) return f;
+            // rename files name with ${this.name} in place of 'starter'
+            let dest = f.replace("starter", this.nameSc)
+            mv('-n', f, dest)
+            return f
+          })
+      }
+      catch(err) {
+          console.log('it does not exist');
+      }
+
+
     }
 
     displaySuccess(){

@@ -24,6 +24,7 @@ export const CONFIG = {
     ionic:[
       //'component', 'provider',
       'pages module',
+      'environment module',
       //'module'
     ]
   },
